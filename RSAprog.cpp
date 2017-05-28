@@ -10,7 +10,8 @@ void swap(int *a,int *b);//入れ替え
 
 int main(int argc, char const *argv[])
 {
-	printf("%d\n",gcd(12,24));
+	printf("%d\n",gcd(15,17));
+	printf("%d\n",lcm(15,17));
 	return 0;
 }
 
@@ -20,7 +21,7 @@ int gcd(int p,int q){
 	int b = q;
 
 	if(a<b){swap(&a,&b);}
-
+	temp = a % b;
 	while(temp!=0){
 		a = b;
 		b = temp;
@@ -30,7 +31,7 @@ int gcd(int p,int q){
 }
 
 int lcm(int p,int q){
-
+	return p*q/gcd(p,q);
 }
 void swap(int *a,int *b){
 	int temp;
