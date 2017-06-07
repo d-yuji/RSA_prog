@@ -3,32 +3,34 @@
 #include <cmath>
 #include <string>
 
+#define POWNUM 32 //最大のべき数
+#define MAXMESSAGE 512 //最大の文字数
+
 using namespace std;
 
 int gcd(int p,int q);//最大公約数
 int lcm(int p,int q);//最小公倍数
 void swap(int *a,int *b);//入れ替え
-int makeE(int l);
-int makeD(int l,int e);
+int makeE(int l);//eの作成
+int makeD(int l,int e);//dの作成
+void encryption(string message,int mlength,int e,int n,int *encResult);//暗号化
+void decryption(int *encResult,int mlength,int d,int n,int *decResult);//復号化
 
-void encryption(string message,int e,int n,int* encResult);
-void decryption(int *encResult,int elength,int d,int n,int *decResult);
+int Pow2[POWNUM];
 
-int Pow2[33];
+int main(int argc, char const *argv[]){
 
-
-int main(int argc, char const *argv[])
-{
-	string message("Hello World!");
-	int encResult[512];
-	int decResult[512];
+	string message("Hello World!!");
+	int encResult[MAXMESSAGE];
+	int decResult[MAXMESSAGE];
 	int mlength = message.length();
+
 	int p = 227;
 	int q = 4099;
 	int n = p*q;
 
 	Pow2[0] = 1;
-	for (int i = 1; i < 31; ++i){
+	for (int i = 1; i < POWNUM; i++){
 		Pow2[i] = Pow2[i-1]*2;
 	}
 
@@ -41,10 +43,10 @@ int main(int argc, char const *argv[])
 	
 	printf("n:%d lambda:%d e:%d d:%d\n",n,lambda,e,d);
 	
-	encryption(message,e,n,encResult);
+	encryption(message,mlength,e,n,encResult);
 
 	printf("encryption results::\n");
-	for (int i = 0; i < mlength; ++i){
+	for (int i = 0; i < mlength; i++){
 		printf("%d ",encResult[i]);
 	}
 	printf("\n");
@@ -52,7 +54,7 @@ int main(int argc, char const *argv[])
 	decryption(encResult,message.length(),d,n,decResult);
 
 	printf("decryption results\n");
-	for (int i = 0; i < mlength; ++i){
+	for (int i = 0; i < mlength; i++){
 		printf("%c",(char)decResult[i]);
 	}
 	printf("\n");
@@ -65,7 +67,8 @@ int gcd(int p,int q){
 	int a = p;
 	int b = q;
 
-	if(a<b){swap(&a,&b);}
+	if(a < b){swap(&a,&b);}
+
 	temp = a % b;
 	while(temp!=0){
 		a = b;
@@ -89,7 +92,7 @@ void swap(int *a,int *b){
 int makeE(int l){
 	int e = 2;
 	while(1){
-		if(e==1||gcd(l,e)==1){
+		if(e == 1||gcd(l,e) == 1){
 			break;
 		}
 		e++;
@@ -99,42 +102,28 @@ int makeE(int l){
 int makeD(int l,int e){
 	int d = 2;
 	while(1){
-		if(d==l||(e*d)%l == 1){
+		if(d == l||(e*d)%l == 1){
 			break;
 		}
 		d++;
 	}
 	return d;
 }
-void encryption(string message,int e,int n,int* encResult){
-	/*
-		message 暗号化する文字列
-		e 文字列を累乗する値
-		n 文字列をmodする値
-		encResult 暗号化された文字列
-		PowM 文字の値を2のべき乗した値からmod nした値の配列
-		enc 暗号化された値
-		indexPow2 2のべき乗のインデックス
-	*/
-	long int PowM[33];
-	long int enc;
-	int indexPow2 = 0;
-	int mlength = message.length();
-	long int temp;
+void encryption(string message,int mlength,int e,int n,int* encResult){
+	long int PowM[POWNUM];// m^2k mod n (k > 1) の配列
+	long int enc;//暗号化された値
+	int indexPow2 = 0;//2の冪乗のインデックス
 
-	for(int i=0;i < mlength;i++){
+	for(int i = 0;i < mlength;i++){
 		enc = 1;
-		PowM[0] = message[i]%n;
+		PowM[0] = message[i] % n;
 		indexPow2 = 0;
-		for(int j = 1; j<31; j++){
-			temp = PowM[j-1]*PowM[j-1];
-			PowM[j] = temp%n;
+
+		for(int j = 1; j < POWNUM-1; j++){
+			PowM[j] = (PowM[j-1] * PowM[j-1]) % n;
 		}
 
-		while(true){
-			if(Pow2[indexPow2] > e){
-				break;
-			}
+		while(Pow2[indexPow2] <= e){
 			if((e&Pow2[indexPow2]) > 0){
 				enc = enc * PowM[indexPow2];
 				enc = enc %n;
@@ -147,28 +136,24 @@ void encryption(string message,int e,int n,int* encResult){
 	return;
 }
 
-void decryption(int *encResult,int elength,int d,int n,int* decResult){
-	long int PowD[33];
+void decryption(int *encResult,int mlength,int d,int n,int* decResult){
+	long int PowD[POWNUM];
 	long int dec;
 	int indexPow2 = 0;
-	long int temp;
 
-	for(int i=0; i < elength;i++){
+	for(int i = 0; i < mlength; i++){
 		dec = 1;
 		PowD[0] = encResult[i] % n;
 		indexPow2 = 0;
-		for(int j = 1; j<31; j++){
-			temp = PowD[j-1]*PowD[j-1];
-			PowD[j] = temp%n;
+
+		for(int j = 1; j < POWNUM-1; j++){
+			PowD[j] = (PowD[j-1] * PowD[j-1]) % n;
 		}
 
-		while(true){
-			if(Pow2[indexPow2] > d){
-				break;
-			}
+		while(Pow2[indexPow2] <= d){
 			if((d&Pow2[indexPow2]) > 0){
 				dec = dec * PowD[indexPow2];
-				dec = dec%n;
+				dec = dec % n;
 			}
 			indexPow2++;
 		}
