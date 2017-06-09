@@ -54,7 +54,7 @@ int main(int argc, char const *argv[]){
 	printf("\n");
 
 	//復号化
-	decryption(encResult,message.length(),d,n,decResult);
+	decryption(encResult,mlength,d,n,decResult);
 
 	printf("decryption results\n");
 	for (int i = 0; i < mlength; i++){
@@ -94,7 +94,7 @@ int lcm(int p,int q){
 
 int makeE(int l){
 	int e = 2;
-	while(1){
+	while(true){
 		if(e == 1||gcd(l,e) == 1){
 			break;
 		}
@@ -104,7 +104,7 @@ int makeE(int l){
 }
 int makeD(int l,int e){
 	int d = 2;
-	while(1){
+	while(true){
 		if(d == l||(e*d)%l == 1){
 			break;
 		}
@@ -112,7 +112,7 @@ int makeD(int l,int e){
 	}
 	return d;
 }
-void encryption(string message,int mlength,int e,int n,int* encResult){
+void encryption(string message,int mlength,int e,int n,int *encResult){
 	long int PowM[POWNUM]; //m^2k mod n (k > 1) の配列
 	long int enc; //暗号化された値
 	int indexPow2 = 0; //2の冪乗のインデックス
@@ -143,7 +143,7 @@ void encryption(string message,int mlength,int e,int n,int* encResult){
 	return;
 }
 
-void decryption(int *encResult,int mlength,int d,int n,int* decResult){
+void decryption(int *encResult,int mlength,int d,int n,int *decResult){
 	long int PowD[POWNUM]; // d^2k mod n (k > 1) の配列
 	long int dec; //復号化された値
 	int indexPow2 = 0; //2の冪乗のインデックス
